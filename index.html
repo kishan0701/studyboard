@@ -1,0 +1,1346 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CampusSync OS — AI College Notice Intelligence & Daily Action Hub</title>
+    <!-- Google Fonts: Sora (Headings) + Manrope (Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tailwind CSS CDN for instant Go Live & Vercel compatibility -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Manrope", "sans-serif"],
+              display: ["Sora", "sans-serif"],
+            },
+            colors: {
+              primary: {
+                DEFAULT: "#2563eb",
+                hover: "#1d4ed8",
+                dark: "#1e3a8a",
+              },
+              faculty: {
+                DEFAULT: "#059669",
+                hover: "#047857",
+                dark: "#064e3b",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family: "Manrope", sans-serif;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      .font-display {
+        font-family: "Sora", sans-serif;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.4);
+        border-radius: 9999px;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200"
+  >
+    <!-- TOP BAR: COLLEGE BADGE & ROLE SWITCHER -->
+    <header
+      class="bg-slate-900 text-white border-b border-slate-800 shadow-sm sticky top-0 z-30"
+      id="top-nav-header"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between flex-wrap gap-2 text-xs"
+      >
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <span
+              class="flex size-2.5 rounded-full bg-emerald-400 animate-ping"
+              id="header-pulse-dot"
+            ></span>
+            <span
+              class="font-extrabold uppercase text-[11px] bg-white/10 px-2 py-0.5 rounded-md border border-white/15"
+              id="campus-badge"
+            >
+              TSDC Campus Notice Hub
+            </span>
+          </div>
+          <span class="hidden md:inline text-slate-500">|</span>
+          <span class="hidden sm:inline text-slate-300 font-medium" id="header-today-date">
+            <!-- Populated by JS -->
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <!-- 1-Day Reminder Indicator -->
+          <div
+            class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-bold"
+            id="top-reminder-indicator"
+          >
+            <i data-lucide="bell" class="size-3 text-amber-300 animate-bounce"></i>
+            <span id="top-reminder-text">1 Alert Due Tomorrow</span>
+          </div>
+
+          <!-- Role Toggle (Switch between Student & Professor) -->
+          <button
+            onclick="togglePortalMode()"
+            id="portal-toggle-btn"
+            class="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-xs transition-all text-xs bg-emerald-500 hover:bg-emerald-600 text-slate-950"
+          >
+            <i data-lucide="arrow-left-right" class="size-3.5"></i>
+            <span id="portal-toggle-label">Switch to Professor Portal 👨‍🏫</span>
+          </button>
+
+          <button
+            onclick="toggleDarkMode()"
+            class="p-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white"
+            title="Toggle Dark Mode"
+          >
+            <i data-lucide="moon" class="size-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 1-DAY-BEFORE CRITICAL BANNER (Only visible when actions are due tomorrow) -->
+    <div
+      id="tomorrow-alert-banner"
+      class="bg-gradient-to-r from-rose-600 via-amber-600 to-rose-700 text-white px-4 py-2.5 shadow-md"
+    >
+      <div
+        class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+      >
+        <div class="flex items-center gap-2.5">
+          <span class="flex size-7 rounded-xl bg-white/20 items-center justify-center shrink-0">
+            <i data-lucide="alert-triangle" class="size-4 text-amber-200"></i>
+          </span>
+          <div>
+            <span
+              class="font-extrabold uppercase tracking-wide bg-white/20 px-1.5 py-0.2 rounded text-[10px]"
+              >🚨 KAL (TOMORROW) DEADLINE ALERT:</span
+            >
+            <strong class="ml-1.5" id="tomorrow-banner-msg"
+              >OS Lab 4 Practical Journal Checking (Room 701) — Mrs. Abha Dhote</strong
+            >
+          </div>
+        </div>
+        <button
+          onclick="document.getElementById('tomorrow-alert-banner').classList.add('hidden')"
+          class="self-end sm:self-auto bg-white text-slate-900 hover:bg-slate-100 px-3 py-1 rounded-lg font-bold text-[11px] shadow-sm transition-colors flex items-center gap-1"
+        >
+          <i data-lucide="check" class="size-3"></i> Understood
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex-1 space-y-6">
+      <!-- ================================================================= -->
+      <!-- VIEW 1: PROFESSOR PORTAL (PURE NOTICE BROADCASTER + AI EXTRACTOR) -->
+      <!-- ================================================================= -->
+      <section id="portal-faculty" class="hidden space-y-6">
+        <!-- Professor Hero Banner -->
+        <div
+          class="rounded-3xl bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white p-6 sm:p-8 shadow-xl"
+        >
+          <div class="max-w-3xl space-y-2">
+            <div
+              class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur-md"
+            >
+              <i data-lucide="shield-check" class="size-3.5 text-emerald-300"></i>
+              <span>Department of Computer Science &amp; Engineering · Faculty Desk</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold font-display tracking-tight">
+              AI Notice Broadcaster &amp; Schedule Pinner 👨‍🏫
+            </h2>
+            <p class="text-xs sm:text-sm text-emerald-100 leading-relaxed">
+              Type or paste ANY circular or classroom instruction below. The
+              <strong>AI Engine</strong> automatically extracts
+              <strong>What to do, The Exact Target Date, Urgency level</strong> and pins it onto
+              every student's daily agenda!
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Left: Smart AI Notice Composer (7 cols) -->
+          <div
+            class="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xs space-y-4"
+          >
+            <div
+              class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3"
+            >
+              <h3
+                class="font-bold text-base flex items-center gap-2 text-emerald-700 dark:text-emerald-400"
+              >
+                <i data-lucide="sparkles" class="size-4 text-amber-400"></i> AI Notice Composer
+                &amp; Date Extractor
+              </h3>
+              <span
+                class="text-[10px] bg-emerald-500/15 text-emerald-600 px-2 py-0.5 rounded-full font-bold"
+                >Auto-Parse Active</span
+              >
+            </div>
+
+            <div class="space-y-3.5 text-xs sm:text-sm">
+              <div>
+                <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300"
+                  >Notice Category</label
+                >
+                <select
+                  id="prof-category"
+                  class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold"
+                  onchange="runAIExtractor()"
+                >
+                  <option value="journal">📝 Practical Journal / Project Submission</option>
+                  <option value="compulsory">⚠️ Compulsory Attendance / Guest Lecture</option>
+                  <option value="exam">🎓 Exam Form Verification / Viva Voce</option>
+                  <option value="reschedule">🏛️ Class Rescheduled / Holiday Notice</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                  Notice Title / Subject Line
+                </label>
+                <input
+                  type="text"
+                  id="prof-title"
+                  value="OS Lab 4 Practical Journal Checking (Room 701)"
+                  class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-semibold text-xs sm:text-sm"
+                  oninput="runAIExtractor()"
+                />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="font-semibold text-slate-700 dark:text-slate-300"
+                    >Notice Text (Paste rough circular or WhatsApp message)</label
+                  >
+                  <span class="text-[10px] text-slate-400 font-mono">Natural Language OK</span>
+                </div>
+                <textarea
+                  id="prof-raw-text"
+                  rows="4"
+                  class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 text-xs sm:text-sm leading-relaxed"
+                  oninput="runAIExtractor()"
+                >
+All TYCS students must submit their signed OS Practical Journals for CPU Scheduling in Room 701 before tomorrow 11:30 AM. Students without verified index will be marked absent by Mrs. Abha Dhote.</textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300"
+                    >Action Deadline Date</label
+                  >
+                  <input
+                    type="date"
+                    id="prof-action-date"
+                    class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold"
+                    onchange="runAIExtractor()"
+                  />
+                </div>
+                <div>
+                  <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300"
+                    >Faculty In-Charge / HOD</label
+                  >
+                  <input
+                    type="text"
+                    id="prof-author"
+                    value="Mrs. Abha Dhote (CS HOD)"
+                    class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 text-xs sm:text-sm"
+                    oninput="runAIExtractor()"
+                  />
+                </div>
+              </div>
+
+              <div class="pt-2 flex items-center gap-2">
+                <button
+                  onclick="publishNoticeByProf()"
+                  class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all"
+                >
+                  <i data-lucide="send" class="size-4"></i>
+                  <span>Publish Notice &amp; Pin to All Students' Schedules</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Real-Time AI Extraction Preview (5 cols) -->
+          <div class="lg:col-span-5 space-y-4">
+            <div
+              class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xs space-y-3.5"
+            >
+              <div
+                class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3"
+              >
+                <h3
+                  class="font-bold text-sm sm:text-base flex items-center gap-2 text-indigo-600 dark:text-indigo-400"
+                >
+                  <i data-lucide="cpu" class="size-4"></i> AI Parsed Intelligence Card
+                </h3>
+                <span
+                  class="text-[10px] bg-indigo-500/10 text-indigo-600 px-2 py-0.5 rounded-md font-bold"
+                  >Live Extractor</span
+                >
+              </div>
+
+              <p class="text-xs text-slate-500 leading-tight">
+                Here is how students will see and receive this notice on their daily action
+                timeline:
+              </p>
+
+              <!-- Extracted AI Card Preview -->
+              <div
+                class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5"
+                id="ai-preview-card"
+              >
+                <!-- Dynamically populated -->
+              </div>
+
+              <!-- 1-Click WhatsApp Broadcast Output -->
+              <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                  <span class="font-bold text-emerald-600 flex items-center gap-1">
+                    <i data-lucide="smartphone" class="size-3.5"></i> WhatsApp Class Broadcast
+                  </span>
+                  <span class="text-[10px] text-slate-400">1-Click Format</span>
+                </div>
+                <div
+                  class="p-3 rounded-xl bg-emerald-950/15 border border-emerald-500/30 text-[11px] font-mono whitespace-pre-wrap text-slate-800 dark:text-slate-200 max-h-36 overflow-y-auto"
+                  id="prof-whatsapp-preview"
+                >
+                  <!-- Preview -->
+                </div>
+                <button
+                  onclick="copyProfWhatsApp()"
+                  id="prof-copy-btn"
+                  class="w-full mt-2 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <i data-lucide="copy" class="size-3.5"></i> Copy WhatsApp Message
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 2: STUDENT PORTAL ("IS DIN KE PEHLE KYA KARNA HAI" TIMELINE) -->
+      <!-- ================================================================= -->
+      <section id="portal-student" class="space-y-6">
+        <!-- Student Welcome & Quick Logger Header -->
+        <div
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5"
+        >
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="size-2 rounded-full bg-blue-600"></span>
+              <h1
+                class="text-2xl sm:text-3xl font-bold font-display tracking-tight text-slate-900 dark:text-white"
+              >
+                Is Din Ke Pehle Kya Karna Hai? 📅
+              </h1>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              Official professor notices + in-class teacher instructions (<em
+                >"Ma'am ne class me bola"</em
+              >) in one chronological timeline.
+            </p>
+          </div>
+
+          <button
+            onclick="openAddClassInstructionModal()"
+            class="px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md transition-all"
+          >
+            <i data-lucide="plus-circle" class="size-4"></i>
+            <span>+ Add In-Class Instruction / Project Task</span>
+          </button>
+        </div>
+
+        <!-- MAIN SPLIT: DATE-WISE TIMELINE (AAJ / KAL) vs CAMPUS NOTICEBOARD -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Left: Date-Wise Action Agenda (5 cols) -->
+          <div class="lg:col-span-5 space-y-4">
+            <div
+              class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xs space-y-4"
+            >
+              <div
+                class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3"
+              >
+                <div class="flex items-center gap-2">
+                  <span
+                    class="size-7 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold"
+                  >
+                    <i data-lucide="calendar" class="size-4"></i>
+                  </span>
+                  <div>
+                    <h3 class="font-bold text-sm sm:text-base">Date-Wise Action Feed</h3>
+                    <p class="text-[11px] text-slate-400">Things due before each date</p>
+                  </div>
+                </div>
+                <span class="text-xs font-bold text-blue-600" id="agenda-count-badge"
+                  >3 Actions</span
+                >
+              </div>
+
+              <!-- Date Segment Filters -->
+              <div
+                class="flex bg-slate-100 dark:bg-slate-800/60 p-1 rounded-2xl text-xs font-semibold"
+              >
+                <button
+                  onclick="setStudentTimelineFilter('today')"
+                  id="t-btn-today"
+                  class="flex-1 py-1.5 rounded-xl bg-blue-600 text-white shadow-xs transition-all"
+                >
+                  Today (Aaj)
+                </button>
+                <button
+                  onclick="setStudentTimelineFilter('tomorrow')"
+                  id="t-btn-tomorrow"
+                  class="flex-1 py-1.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 transition-all"
+                >
+                  Tomorrow (Kal 🚨)
+                </button>
+                <button
+                  onclick="setStudentTimelineFilter('all')"
+                  id="t-btn-all"
+                  class="flex-1 py-1.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 transition-all"
+                >
+                  All Dates
+                </button>
+              </div>
+
+              <!-- Action Items List -->
+              <div class="space-y-2.5" id="student-agenda-container">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Quick Pomodoro Focus Widget -->
+            <div
+              class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-3xl p-5 shadow-sm space-y-3"
+            >
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold flex items-center gap-1.5 text-amber-300">
+                  <i data-lucide="timer" class="size-4"></i> Deep Focus Sprint
+                </span>
+                <span class="bg-white/10 px-2 py-0.5 rounded-md text-[10px]">25m Focus</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="text-3xl font-extrabold font-display" id="pomodoro-timer-val">
+                  25:00
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    onclick="toggleStudentPomodoro()"
+                    id="pomodoro-action-btn"
+                    class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 font-bold text-xs transition-all flex items-center gap-1"
+                  >
+                    <i data-lucide="play" class="size-3.5"></i> Start
+                  </button>
+                  <button
+                    onclick="resetStudentPomodoro()"
+                    class="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300"
+                  >
+                    <i data-lucide="rotate-ccw" class="size-3.5"></i>
+                  </button>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-tight">
+                Finish your upcoming deadline task before the timer rings!
+              </p>
+            </div>
+          </div>
+
+          <!-- Right: Official College Notice Board & Circulars (7 cols) -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div
+                class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-semibold custom-scrollbar"
+              >
+                <button
+                  onclick="filterStudentNotices('all')"
+                  id="sn-filter-all"
+                  class="px-3 py-1.5 rounded-xl bg-blue-600 text-white shrink-0 shadow-2xs transition-all"
+                >
+                  All Notices
+                </button>
+                <button
+                  onclick="filterStudentNotices('compulsory')"
+                  id="sn-filter-compulsory"
+                  class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-amber-600 shrink-0 hover:border-amber-500 transition-all"
+                >
+                  ⚠️ Compulsory Attendance
+                </button>
+                <button
+                  onclick="filterStudentNotices('journal')"
+                  id="sn-filter-journal"
+                  class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-rose-600 shrink-0 hover:border-rose-500 transition-all"
+                >
+                  📝 Journal Checks
+                </button>
+                <button
+                  onclick="filterStudentNotices('exam')"
+                  id="sn-filter-exam"
+                  class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-indigo-600 shrink-0 hover:border-indigo-500 transition-all"
+                >
+                  🎓 Exam Forms
+                </button>
+              </div>
+
+              <div class="relative w-full sm:w-52 shrink-0">
+                <i
+                  data-lucide="search"
+                  class="size-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+                ></i>
+                <input
+                  type="text"
+                  id="student-notice-search"
+                  oninput="renderStudentNoticeStream()"
+                  placeholder="Search circulars..."
+                  class="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <!-- Notices Stream -->
+            <div class="space-y-4" id="student-notices-stream">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- MODAL: ADD IN-CLASS TEACHER INSTRUCTION / PROJECT TASK -->
+    <aside aria-label="Add In-Class Task">
+      <div
+        id="class-instruction-modal"
+        class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4"
+        >
+          <div
+            class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3"
+          >
+            <div class="flex items-center gap-2">
+              <i data-lucide="edit-3" class="size-4 text-blue-600"></i>
+              <h3 class="font-bold text-base">Add What Ma'am / Sir Said in Class</h3>
+            </div>
+            <button
+              onclick="closeAddClassInstructionModal()"
+              class="text-slate-400 hover:text-slate-600"
+            >
+              <i data-lucide="x" class="size-4"></i>
+            </button>
+          </div>
+
+          <form onsubmit="handleSaveClassInstruction(event)" class="space-y-3.5 text-xs sm:text-sm">
+            <div>
+              <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300"
+                >Professor / Faculty Name</label
+              >
+              <input
+                type="text"
+                id="ci-prof"
+                required
+                placeholder="e.g. Mrs. Abha Dhote / Dr. Giri"
+                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300"
+                >Subject / Course / Project</label
+              >
+              <input
+                type="text"
+                id="ci-subject"
+                required
+                placeholder="e.g. Operating Systems / TYCS Mini Project"
+                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300"
+                >What to do / What to bring before date?</label
+              >
+              <input
+                type="text"
+                id="ci-task"
+                required
+                placeholder="e.g. Bring signed hard copy of project abstract + 2 photos"
+                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300"
+                  >Target Date</label
+                >
+                <input
+                  type="date"
+                  id="ci-date"
+                  required
+                  class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300"
+                  >Category</label
+                >
+                <select
+                  id="ci-type"
+                  class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="class-note">Class Instruction</option>
+                  <option value="project-work">Project Milestone</option>
+                  <option value="personal">Personal To-Do</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onclick="closeAddClassInstructionModal()"
+                class="flex-1 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="flex-1 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold"
+              >
+                Pin to Agenda
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </aside>
+
+    <!-- JAVASCRIPT LOGIC & AI PARSER -->
+    <script>
+      // 1. DATE HELPERS
+      function getOffsetDateStr(offset) {
+        const d = new Date();
+        d.setDate(d.getDate() + offset);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      }
+
+      const todayStr = getOffsetDateStr(0);
+      const tomorrowStr = getOffsetDateStr(1);
+
+      // Initial state
+      let activePortal = "student"; // 'student' or 'faculty'
+      let studentTimelineFilter = "today";
+      let studentNoticeCategory = "all";
+
+      // REAL-WORLD COLLEGE NOTICES WITH MANDATORY ACTION DATES
+      let officialNotices = JSON.parse(localStorage.getItem("sb_official_notices") || "null") || [
+        {
+          id: "not-0",
+          title: "📢 COMPULSORY: TYCS – Mini Project Progress Presentation",
+          category: "project",
+          actionDate: "2026-10-10",
+          author: "Mrs. Abha Dhote (CS HOD) & Dr. G.D. Giri (Principal)",
+          refNo: "TSDC/SP-06/375/2026-27",
+          actionItem: "Present Mini Project Progress (13 points) in Room 701 at 12:15 PM",
+          message:
+            "All TYCS students are informed that Mini Project Progress Presentation is scheduled on 10/10/2026 from 12:15 PM onwards in room 701. Groups must present: 1. Project Title, 2. Group Members & Roll Nos, 3. Problem Statement, 4. Objectives, 5. Proposed Solution/Methodology, 6. Tech Stack/Tools, 7. Dataset/Data Collection, 8. System Architecture/Flowchart, 9. Work Completed, 10. Prototype Demo, 11. Results/Findings, 12. Future Plan, 13. Challenges Faced. Attendance is compulsory.",
+          pinnedByStudent: true,
+          studentSubNote:
+            "Carry PPT on pen drive, spiral project draft, source code & live prototype ready",
+          isDone: false,
+        },
+        {
+          id: "not-1",
+          title: "⚠️ OS Lab 4 Practical Journal Checking & Sign-off",
+          category: "journal",
+          actionDate: tomorrowStr, // Due tomorrow! (Triggers alert banner)
+          author: "Mrs. Abha Dhote (CS HOD)",
+          refNo: "TSDC/CS/LAB-4/2026-27",
+          actionItem: "Submit verified OS CPU scheduling journal in Room 701",
+          message:
+            "All TYCS students must bring signed practical journals with index verified for Lab 4 CPU scheduling in Room 701 before 11:30 AM. Absent students will be marked defaulter.",
+          pinnedByStudent: true,
+          studentSubNote: "Carry 2 passport photos for exam form along with journal",
+          isDone: false,
+        },
+        {
+          id: "not-2",
+          title: "📢 Attendance Compulsory: Seminar on Cyber Forensics",
+          category: "compulsory",
+          actionDate: todayStr, // Due today!
+          author: "Dr. G.D. Giri (Principal)",
+          refNo: "TSDC/ACAD/2026/109",
+          actionItem: "Attend mandatory guest lecture in Room 701 (Biometric attendance)",
+          message:
+            "Mandatory technical session on Industry Cyber Security in Room 701. Biometric attendance will be counted towards term-grant criteria.",
+          pinnedByStudent: true,
+          studentSubNote: "",
+          isDone: false,
+        },
+        {
+          id: "not-3",
+          title: "🎓 Exam Form Verification & Hall Ticket Fee Cutoff",
+          category: "exam",
+          actionDate: getOffsetDateStr(3),
+          author: "Exam Cell Office",
+          refNo: "TSDC/EXAM/TYCS-2026",
+          actionItem: "Submit marksheet copy & pay fees at Counter 3",
+          message:
+            "Submit verified copy of semester marksheet and pay university examination fees at Counter 3 before 3:00 PM.",
+          pinnedByStudent: false,
+          studentSubNote: "",
+          isDone: false,
+        },
+        {
+          id: "not-4",
+          title: "🏛️ Rescheduled: Computer Networks Practical on Saturday",
+          category: "holiday",
+          actionDate: getOffsetDateStr(5),
+          author: "Prof. S. Sharma",
+          refNo: "TSDC/TT/2026-44",
+          actionItem: "Attend shifted CN Lab at 10:30 AM in Lab 2",
+          message:
+            "Due to institutional symposium, Friday laboratory batch B is shifted to Saturday 10:30 AM in Lab 2.",
+          pinnedByStudent: false,
+          studentSubNote: "",
+          isDone: false,
+        },
+      ];
+
+      // IN-CLASS TEACHER INSTRUCTIONS & STUDENT TASKS ("Ma'am ne class me bola")
+      let studentClassNotes = JSON.parse(
+        localStorage.getItem("sb_student_class_notes") || "null",
+      ) || [
+        {
+          id: "cn-1",
+          prof: "Mrs. Abha Dhote",
+          subject: "TYCS Mini Project",
+          task: "Bring signed hard copy of project abstract & flowchart",
+          date: tomorrowStr,
+          type: "class-note",
+          done: false,
+        },
+        {
+          id: "cn-2",
+          prof: "Prof. S. Sharma",
+          subject: "Database Management",
+          task: "Read Chapter 4 3NF Normalization rules before viva",
+          date: todayStr,
+          type: "class-note",
+          done: true,
+        },
+        {
+          id: "cn-3",
+          prof: "Self",
+          subject: "Linear Algebra",
+          task: "Solve Gram-Schmidt exercises 5.1 to 5.4",
+          date: getOffsetDateStr(3),
+          type: "project-work",
+          done: false,
+        },
+      ];
+
+      function saveState() {
+        localStorage.setItem("sb_official_notices", JSON.stringify(officialNotices));
+        localStorage.setItem("sb_student_class_notes", JSON.stringify(studentClassNotes));
+      }
+
+      function toggleDarkMode() {
+        document.documentElement.classList.toggle("dark");
+      }
+
+      function togglePortalMode() {
+        activePortal = activePortal === "student" ? "faculty" : "student";
+        const label = document.getElementById("portal-toggle-label");
+        const btn = document.getElementById("portal-toggle-btn");
+        const pulseDot = document.getElementById("header-pulse-dot");
+        const campusBadge = document.getElementById("campus-badge");
+
+        if (activePortal === "faculty") {
+          document.getElementById("portal-student").classList.add("hidden");
+          document.getElementById("portal-faculty").classList.remove("hidden");
+          label.innerText = "Switch to Student Portal 🎓";
+          btn.className =
+            "px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-xs transition-all text-xs bg-blue-600 hover:bg-blue-700 text-white";
+          pulseDot.className = "flex size-2.5 rounded-full bg-amber-400 animate-ping";
+          campusBadge.innerText = "TSDC Faculty Broadcast Desk";
+          runAIExtractor();
+        } else {
+          document.getElementById("portal-faculty").classList.add("hidden");
+          document.getElementById("portal-student").classList.remove("hidden");
+          label.innerText = "Switch to Professor Portal 👨‍🏫";
+          btn.className =
+            "px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-xs transition-all text-xs bg-emerald-500 hover:bg-emerald-600 text-slate-950";
+          pulseDot.className = "flex size-2.5 rounded-full bg-emerald-400 animate-ping";
+          campusBadge.innerText = "TSDC Campus Notice Hub";
+          renderStudentAgenda();
+          renderStudentNoticeStream();
+        }
+      }
+
+      // 2. AI NOTICE EXTRACTOR (Extracts action, target date, urgency, faculty)
+      function runAIExtractor() {
+        const title = document.getElementById("prof-title").value.trim();
+        const raw = document.getElementById("prof-raw-text").value.trim();
+        const author = document.getElementById("prof-author").value.trim();
+        let actionDate = document.getElementById("prof-action-date").value;
+        const category = document.getElementById("prof-category").value;
+
+        // Smart Date Extraction if date input empty
+        if (!actionDate) {
+          if (/tomorrow|kal/i.test(raw)) {
+            actionDate = tomorrowStr;
+            document.getElementById("prof-action-date").value = tomorrowStr;
+          } else if (/today|aaj/i.test(raw)) {
+            actionDate = todayStr;
+            document.getElementById("prof-action-date").value = todayStr;
+          } else {
+            actionDate = tomorrowStr;
+            document.getElementById("prof-action-date").value = tomorrowStr;
+          }
+        }
+
+        // Smart Action Summarizer
+        let extractedAction = title;
+        if (/journal/i.test(raw)) extractedAction = "Submit signed lab practical journal";
+        else if (/biometric|attendance/i.test(raw))
+          extractedAction = "Report to Room 701 for compulsory attendance";
+        else if (/exam|fee/i.test(raw)) extractedAction = "Submit verification form & pay fees";
+
+        const isTomorrow = actionDate === tomorrowStr;
+        const previewCard = document.getElementById("ai-preview-card");
+
+        previewCard.innerHTML = `
+        <div class="flex items-center justify-between text-[11px] font-bold">
+          <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 uppercase">
+            ⚡ Extracted Action Item
+          </span>
+          <span class="text-rose-600 dark:text-rose-400 font-extrabold flex items-center gap-1">
+            <i data-lucide="calendar" class="size-3"></i> ${actionDate} (${isTomorrow ? "🚨 KAL / Tomorrow!" : "Scheduled"})
+          </span>
+        </div>
+        <p class="text-sm font-bold text-slate-900 dark:text-white mt-1">"${extractedAction}"</p>
+        <p class="text-xs text-slate-500 leading-relaxed">${raw.slice(0, 140)}...</p>
+        <div class="pt-2 border-t border-slate-200 dark:border-slate-700 text-[10px] text-slate-400 flex items-center justify-between">
+          <span>Authority: <strong>${author}</strong></span>
+          <span class="text-blue-600 font-semibold">Will Auto-Pin to Student Agenda</span>
+        </div>
+      `;
+
+        // WhatsApp format
+        const waText =
+          `📢 *COLLEGE NOTICE: ${title.toUpperCase()}*\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `🗓️ *Target Date:* ${actionDate} (${isTomorrow ? "TOMORROW!" : "Upcoming"})\n` +
+          `📌 *Action Required:* ${extractedAction}\n` +
+          `📝 *Notice Body:* ${raw}\n` +
+          `👨‍🏫 *Issued By:* ${author}\n` +
+          `🌐 *StudyBoard Hub:* http://localhost:8080`;
+
+        document.getElementById("prof-whatsapp-preview").innerText = waText;
+        lucide.createIcons();
+      }
+
+      function publishNoticeByProf() {
+        const title = document.getElementById("prof-title").value.trim();
+        const raw = document.getElementById("prof-raw-text").value.trim();
+        const author = document.getElementById("prof-author").value.trim();
+        const actionDate = document.getElementById("prof-action-date").value || tomorrowStr;
+        const category = document.getElementById("prof-category").value;
+
+        let extractedAction = title;
+        if (/journal/i.test(raw)) extractedAction = "Submit signed lab practical journal";
+        else if (/biometric|attendance/i.test(raw))
+          extractedAction = "Report for compulsory attendance";
+
+        officialNotices.unshift({
+          id: "not-" + Date.now(),
+          title,
+          category,
+          actionDate,
+          author,
+          refNo: "TSDC/" + Math.floor(100 + Math.random() * 900) + "/2026",
+          actionItem: extractedAction,
+          message: raw,
+          pinnedByStudent: true,
+          studentSubNote: "",
+          isDone: false,
+        });
+
+        saveState();
+        alert(
+          `✅ Notice Published!\n\nTarget Date: ${actionDate}\nAuto-pinned to all student "Is Din Ke Pehle Kya Karna Hai" dashboards!`,
+        );
+        togglePortalMode(); // Switch back to student view so professor/user sees it instantly live!
+      }
+
+      function copyProfWhatsApp() {
+        const text = document.getElementById("prof-whatsapp-preview").innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.getElementById("prof-copy-btn");
+          btn.innerHTML = `<i data-lucide="check" class="size-3.5"></i> Copied to Clipboard! Ready for WhatsApp`;
+          setTimeout(() => {
+            btn.innerHTML = `<i data-lucide="copy" class="size-3.5"></i> Copy WhatsApp Message`;
+            lucide.createIcons();
+          }, 2500);
+          lucide.createIcons();
+        });
+      }
+
+      // 3. STUDENT DASHBOARD TIMELINE & ACTIONS
+      function setStudentTimelineFilter(filter) {
+        studentTimelineFilter = filter;
+        ["today", "tomorrow", "all"].forEach((f) => {
+          const btn = document.getElementById(`t-btn-${f}`);
+          if (f === filter) {
+            btn.className =
+              "flex-1 py-1.5 rounded-xl bg-blue-600 text-white shadow-xs transition-all font-bold";
+          } else {
+            btn.className =
+              "flex-1 py-1.5 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 transition-all font-medium";
+          }
+        });
+        renderStudentAgenda();
+      }
+
+      function renderStudentAgenda() {
+        const container = document.getElementById("student-agenda-container");
+
+        // 1. Items from Official Professor Notices
+        const noticeItems = officialNotices.map((n) => ({
+          source: "notice",
+          id: n.id,
+          title: n.title,
+          actionText: n.actionItem || n.title,
+          faculty: n.author,
+          date: n.actionDate,
+          tag:
+            n.category === "compulsory"
+              ? "⚠️ Compulsory"
+              : n.category === "journal"
+                ? "📝 Journal"
+                : "📢 Circular",
+          tagStyle:
+            n.category === "compulsory"
+              ? "bg-amber-500/15 text-amber-600 border-amber-500/30"
+              : "bg-rose-500/15 text-rose-600 border-rose-500/30",
+          done: n.isDone,
+          note: n.studentSubNote,
+        }));
+
+        // 2. Items from In-Class Student Notes ("Ma'am ne class me bola")
+        const classNoteItems = studentClassNotes.map((cn) => ({
+          source: "class-note",
+          id: cn.id,
+          title: `${cn.subject}: ${cn.task}`,
+          actionText: cn.task,
+          faculty: `Said by ${cn.prof}`,
+          date: cn.date,
+          tag: cn.type === "project-work" ? "🚀 Project" : "🗣️ Class Instruction",
+          tagStyle: "bg-blue-500/15 text-blue-600 border-blue-500/30",
+          done: cn.done,
+          note: "",
+        }));
+
+        const merged = [...noticeItems, ...classNoteItems];
+
+        // Filter by timeline segment
+        const filtered = merged
+          .filter((item) => {
+            if (studentTimelineFilter === "today") return item.date === todayStr;
+            if (studentTimelineFilter === "tomorrow") return item.date === tomorrowStr;
+            return true;
+          })
+          .sort((a, b) => a.date.localeCompare(b.date));
+
+        document.getElementById("agenda-count-badge").innerText = `${filtered.length} Actions`;
+
+        if (filtered.length === 0) {
+          container.innerHTML = `
+          <div class="py-10 text-center text-slate-400 text-xs">
+            🎉 Nothing scheduled before this date! You are completely relaxed.
+          </div>
+        `;
+          return;
+        }
+
+        container.innerHTML = filtered
+          .map(
+            (item) => `
+        <div class="p-3.5 rounded-2xl border transition-all ${item.done ? "opacity-50 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800" : "bg-slate-50 dark:bg-slate-800/40 border-slate-200/80 dark:border-slate-700/80 hover:border-blue-500/60 shadow-2xs"}">
+          <div class="flex items-start gap-3">
+            <button onclick="toggleActionItem('${item.source}', '${item.id}')" class="size-5 rounded-lg border mt-0.5 flex items-center justify-center shrink-0 transition-colors ${item.done ? "bg-emerald-500 border-emerald-500 text-white" : "border-slate-300 dark:border-slate-600 hover:border-blue-500"}">
+              ${item.done ? '<i data-lucide="check" class="size-3.5"></i>' : ""}
+            </button>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${item.tagStyle}">
+                  ${item.tag}
+                </span>
+                <span class="text-[11px] font-bold ${item.date === todayStr ? "text-emerald-600" : item.date === tomorrowStr ? "text-rose-600 dark:text-rose-400" : "text-slate-400"}">
+                  ${item.date === todayStr ? "Today (Aaj)" : item.date === tomorrowStr ? "🚨 Kal (Tomorrow!)" : item.date}
+                </span>
+              </div>
+
+              <h4 class="text-xs sm:text-sm font-bold mt-1 text-slate-900 dark:text-white ${item.done ? "line-through text-slate-400" : ""}">
+                ${item.title}
+              </h4>
+
+              <div class="mt-1 flex items-center justify-between text-[11px] text-slate-400">
+                <span>👨‍🏫 ${item.faculty}</span>
+                ${item.note ? `<span class="text-blue-600 dark:text-blue-400 font-semibold">📌 ${item.note}</span>` : ""}
+              </div>
+            </div>
+          </div>
+        </div>
+      `,
+          )
+          .join("");
+        lucide.createIcons();
+      }
+
+      function toggleActionItem(source, id) {
+        if (source === "notice") {
+          const n = officialNotices.find((x) => x.id === id);
+          if (n) n.isDone = !n.isDone;
+        } else {
+          const cn = studentClassNotes.find((x) => x.id === id);
+          if (cn) cn.done = !cn.done;
+        }
+        saveState();
+        renderAll();
+      }
+
+      // 4. STUDENT IN-CLASS NOTE MODAL
+      function openAddClassInstructionModal() {
+        document.getElementById("ci-date").value = tomorrowStr;
+        document.getElementById("class-instruction-modal").classList.remove("hidden");
+      }
+
+      function closeAddClassInstructionModal() {
+        document.getElementById("class-instruction-modal").classList.add("hidden");
+      }
+
+      function handleSaveClassInstruction(e) {
+        e.preventDefault();
+        const prof = document.getElementById("ci-prof").value.trim();
+        const subject = document.getElementById("ci-subject").value.trim();
+        const task = document.getElementById("ci-task").value.trim();
+        const date = document.getElementById("ci-date").value;
+        const type = document.getElementById("ci-type").value;
+
+        studentClassNotes.unshift({
+          id: "cn-" + Date.now(),
+          prof,
+          subject,
+          task,
+          date,
+          type,
+          done: false,
+        });
+
+        saveState();
+        closeAddClassInstructionModal();
+        document.getElementById("ci-prof").value = "";
+        document.getElementById("ci-subject").value = "";
+        document.getElementById("ci-task").value = "";
+        alert(`✅ Pinned to your agenda before ${date}!`);
+        renderAll();
+      }
+
+      // 5. NOTICE STREAM FILTER & RENDERING
+      function filterStudentNotices(cat) {
+        studentNoticeCategory = cat;
+        ["all", "compulsory", "journal", "exam"].forEach((c) => {
+          const btn = document.getElementById(`sn-filter-${c}`);
+          if (btn) {
+            if (c === cat) {
+              btn.className =
+                "px-3 py-1.5 rounded-xl bg-blue-600 text-white shrink-0 shadow-2xs transition-all font-bold";
+            } else {
+              btn.className =
+                "px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 shrink-0 hover:border-blue-500 transition-all font-semibold";
+            }
+          }
+        });
+        renderStudentNoticeStream();
+      }
+
+      function renderStudentNoticeStream() {
+        const search = (
+          document.getElementById("student-notice-search")?.value || ""
+        ).toLowerCase();
+        const container = document.getElementById("student-notices-stream");
+
+        const filtered = officialNotices
+          .filter((n) => {
+            const matchCategory =
+              studentNoticeCategory === "all" || n.category === studentNoticeCategory;
+            const matchSearch = (n.title + " " + n.message + " " + n.author)
+              .toLowerCase()
+              .includes(search);
+            return matchCategory && matchSearch;
+          })
+          .sort((a, b) => {
+            if (a.pinnedByStudent && !b.pinnedByStudent) return -1;
+            if (!a.pinnedByStudent && b.pinnedByStudent) return 1;
+            return a.actionDate.localeCompare(b.actionDate);
+          });
+
+        container.innerHTML = filtered
+          .map((n) => {
+            const isTomorrow = n.actionDate === tomorrowStr;
+            const isToday = n.actionDate === todayStr;
+
+            let badgeStyle = "bg-blue-500/15 text-blue-600 border-blue-500/30";
+            let badgeLabel = "Circular";
+            if (n.category === "compulsory") {
+              badgeStyle = "bg-amber-500/15 text-amber-600 border-amber-500/30";
+              badgeLabel = "⚠️ Compulsory Attendance";
+            } else if (n.category === "journal") {
+              badgeStyle = "bg-rose-500/15 text-rose-600 border-rose-500/30";
+              badgeLabel = "📝 Journal Sign-off";
+            } else if (n.category === "exam") {
+              badgeStyle = "bg-indigo-500/15 text-indigo-600 border-indigo-500/30";
+              badgeLabel = "🎓 Exam Form Cutoff";
+            }
+
+            return `
+          <div class="bg-white dark:bg-slate-900 border ${n.pinnedByStudent ? "border-blue-500 shadow-md ring-1 ring-blue-500/30" : "border-slate-200 dark:border-slate-800"} rounded-3xl p-5 shadow-xs transition-all space-y-3">
+            <div class="flex items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${badgeStyle}">
+                    ${badgeLabel}
+                  </span>
+                  <span class="text-[10px] text-slate-400 font-mono">Ref: ${n.refNo}</span>
+                </div>
+                <h3 class="font-bold text-sm sm:text-base mt-1.5 text-slate-900 dark:text-white">${n.title}</h3>
+              </div>
+
+              <button onclick="togglePinNotice('${n.id}')" class="px-2.5 py-1 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 ${n.pinnedByStudent ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900"}">
+                <i data-lucide="pin" class="size-3.5"></i>
+                <span class="hidden sm:inline">${n.pinnedByStudent ? "Pinned to Top" : "Pin"}</span>
+              </button>
+            </div>
+
+            <!-- Mandatory Action Callout -->
+            <div class="p-3 rounded-2xl flex items-center justify-between gap-2 ${isTomorrow ? "bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-900 text-rose-700 dark:text-rose-300" : isToday ? "bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-900 text-emerald-700 dark:text-emerald-300" : "bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300"}">
+              <div class="flex items-center gap-2 text-xs font-bold">
+                <i data-lucide="calendar-clock" class="size-4 shrink-0"></i>
+                <span>Must do before: <u>${n.actionDate}</u></span>
+              </div>
+              <span class="text-[11px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 shadow-2xs">
+                ${isToday ? "Today (Aaj)" : isTomorrow ? "🚨 Kal (Tomorrow!)" : "Upcoming"}
+              </span>
+            </div>
+
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              ${n.message}
+            </p>
+
+            <!-- Student Sub-Note Editor -->
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-400">Issued by: <strong>${n.author}</strong></span>
+                <button onclick="editSubNote('${n.id}')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline flex items-center gap-1">
+                  <i data-lucide="plus-circle" class="size-3"></i> ${n.studentSubNote ? "Edit My Note" : "+ Add Personal Action Note"}
+                </button>
+              </div>
+
+              ${
+                n.studentSubNote
+                  ? `
+                <div class="p-2.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/40 text-xs text-blue-900 dark:text-blue-200 flex items-center justify-between">
+                  <span>📌 <strong>My Sub-Note:</strong> ${n.studentSubNote}</span>
+                  <button onclick="deleteSubNote('${n.id}')" class="text-slate-400 hover:text-rose-500"><i data-lucide="trash-2" class="size-3"></i></button>
+                </div>
+              `
+                  : ""
+              }
+
+              <div class="flex justify-end pt-1">
+                <button onclick="shareNoticeWA('${n.id}')" class="text-[11px] font-bold px-3 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-400 transition-colors flex items-center gap-1.5">
+                  <i data-lucide="share-2" class="size-3"></i> Share on Class WhatsApp
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+          })
+          .join("");
+        lucide.createIcons();
+      }
+
+      function togglePinNotice(id) {
+        const n = officialNotices.find((x) => x.id === id);
+        if (n) {
+          n.pinnedByStudent = !n.pinnedByStudent;
+          saveState();
+          renderAll();
+        }
+      }
+
+      function editSubNote(id) {
+        const n = officialNotices.find((x) => x.id === id);
+        if (!n) return;
+        const val = prompt(
+          'Attach personal sub-note for this notice (e.g., "Carry 2 photos", "Get sign before 11:30"):',
+          n.studentSubNote || "",
+        );
+        if (val !== null) {
+          n.studentSubNote = val.trim();
+          saveState();
+          renderAll();
+        }
+      }
+
+      function deleteSubNote(id) {
+        const n = officialNotices.find((x) => x.id === id);
+        if (n) {
+          n.studentSubNote = "";
+          saveState();
+          renderAll();
+        }
+      }
+
+      function shareNoticeWA(id) {
+        const n = officialNotices.find((x) => x.id === id);
+        if (!n) return;
+        const text =
+          `📢 *COLLEGE NOTICE: ${n.title.toUpperCase()}*\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `🗓️ *Target Date:* ${n.actionDate}\n` +
+          `📌 *Action Required:* ${n.actionItem}\n` +
+          `📝 *Notice Body:* ${n.message}\n` +
+          `👨‍🏫 *Issued By:* ${n.author}\n` +
+          `🔗 *StudyBoard:* http://localhost:8080`;
+
+        navigator.clipboard.writeText(text).then(() => {
+          alert(
+            "Notice formatted and copied to clipboard! Ready to paste into WhatsApp class group.",
+          );
+        });
+      }
+
+      // 6. POMODORO TIMER FOR STUDENTS
+      let pTimerSecs = 25 * 60;
+      let pTimerInterval = null;
+
+      function toggleStudentPomodoro() {
+        const btn = document.getElementById("pomodoro-action-btn");
+        if (pTimerInterval) {
+          clearInterval(pTimerInterval);
+          pTimerInterval = null;
+          btn.innerHTML = `<i data-lucide="play" class="size-3.5"></i> Resume`;
+        } else {
+          pTimerInterval = setInterval(() => {
+            if (pTimerSecs > 0) {
+              pTimerSecs--;
+              const m = String(Math.floor(pTimerSecs / 60)).padStart(2, "0");
+              const s = String(pTimerSecs % 60).padStart(2, "0");
+              document.getElementById("pomodoro-timer-val").innerText = `${m}:${s}`;
+            } else {
+              clearInterval(pTimerInterval);
+              pTimerInterval = null;
+              alert("🎉 25-minute focus session finished!");
+              resetStudentPomodoro();
+            }
+          }, 1000);
+          btn.innerHTML = `<i data-lucide="pause" class="size-3.5"></i> Pause`;
+        }
+        lucide.createIcons();
+      }
+
+      function resetStudentPomodoro() {
+        clearInterval(pTimerInterval);
+        pTimerInterval = null;
+        pTimerSecs = 25 * 60;
+        document.getElementById("pomodoro-timer-val").innerText = "25:00";
+        const btn = document.getElementById("pomodoro-action-btn");
+        if (btn) btn.innerHTML = `<i data-lucide="play" class="size-3.5"></i> Start`;
+        lucide.createIcons();
+      }
+
+      // 7. MASTER INITIALIZER
+      function renderAll() {
+        document.getElementById("header-today-date").innerText = new Date().toLocaleDateString(
+          "en-US",
+          {
+            weekday: "long",
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          },
+        );
+
+        // Check tomorrow alerts
+        const dueTomorrow = officialNotices.filter(
+          (n) => n.actionDate === tomorrowStr && !n.isDone,
+        );
+        const banner = document.getElementById("tomorrow-alert-banner");
+        const reminderIndicator = document.getElementById("top-reminder-indicator");
+        const reminderText = document.getElementById("top-reminder-text");
+
+        if (dueTomorrow.length > 0) {
+          banner.classList.remove("hidden");
+          document.getElementById("tomorrow-banner-msg").innerText =
+            `${dueTomorrow[0].title} — Target: Tomorrow! (${dueTomorrow[0].author})`;
+          reminderIndicator.classList.remove("hidden");
+          reminderText.innerText = `${dueTomorrow.length} Action Due Tomorrow!`;
+        } else {
+          banner.classList.add("hidden");
+          reminderIndicator.classList.add("hidden");
+        }
+
+        if (activePortal === "student") {
+          renderStudentAgenda();
+          renderStudentNoticeStream();
+        } else {
+          runAIExtractor();
+        }
+
+        lucide.createIcons();
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("prof-action-date").value = tomorrowStr;
+        renderAll();
+      });
+    </script>
+  </body>
+</html>
